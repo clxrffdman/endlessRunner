@@ -9,14 +9,18 @@
 // Ships speed up with each kill (?) 
 
 let config = {
-    type: Phaser.CANVAS,
+    type: Phaser.AUTO,
     width: 640,
     height: 480,
     fps: {
         forceSetTimeout: true,
         target: 60
     },
-    scene: [ Menu, Play ]
+    scene: [ Menu, Play ],
+
+    physics: {
+        default: "arcade"
+    }
     
 }
 
