@@ -10,19 +10,29 @@
 
 let config = {
     type: Phaser.CANVAS,
-    width: 640,
-    height: 480,
+    width: 1280,
+    height: 720,
+    physics: {
+        default: 'arcade',
+        arcade: {
+            debug: false,
+            gravity: { y: 300 }
+        }
+    },
     fps: {
         forceSetTimeout: true,
         target: 60
     },
+    
     scene: [ Menu, Play ]
     
 }
 
 let game = new Phaser.Game(config);
 
+
 let borderUISize = game.config.height / 15;
 let borderPadding = borderUISize / 3;
 
 let keyF, keyR, keyLEFT, keyRIGHT, keyA, keyD, keyW, keyUP, keyDOWN;
+
