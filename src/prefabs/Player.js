@@ -18,23 +18,23 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     doJump(){
         this.setVelocity(0, -200);
         this.isGrounded = false;
-        this.scene.isGround = false; 
     }
 
-    // setGrounded(){
-    //     this.isGrounded = true;
-    // }
 
     update(){
         this.body.velocity.x = 0;
 
-        if(this.scene.isGround){
+        // if(this.scene.isGround){
+        //     this.isGrounded = true;
+        // }
+        if(this.body.onFloor()){
             this.isGrounded = true;
         }
-        
-
+        //console.log(this.isGrounded);
         if(keyUP.isDown && this.isGrounded){
             this.doJump();
         }
+
+
     }
 }

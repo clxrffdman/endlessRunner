@@ -40,12 +40,8 @@ class Play extends Phaser.Scene {
         this.player = new Player(this, game.config.width/4, game.config.height - borderPadding - borderUISize - 150, 'rocket', Phaser.AUTO, 5).setOrigin(0.5,0);
         
 
-        this.physics.add.collider(this.player, this.floor, playerGround);
+        this.physics.add.collider(this.player, this.floor);
 
-        function playerGround(){
-            
-            this.isGround = true;
-        }
 
 
         keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
@@ -75,6 +71,7 @@ class Play extends Phaser.Scene {
         
         //console.log(this.isGround);
 
+
         if(this.gameOver && Phaser.Input.Keyboard.JustDown(keyR)) {
             game.settings.spaceshipSpeed = 4;
             this.scene.restart();    
@@ -90,7 +87,8 @@ class Play extends Phaser.Scene {
 
         if(!this.gameOver) {
 
-
+            
+            
             this.player.update();
             
         }
