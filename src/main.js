@@ -16,13 +16,14 @@ let config = {
         default: 'arcade',
         arcade: {
             debug: false,
-            gravity: { y: 0 }
+            gravity: { y: 0 },
+            tileBias: 32
         }
     },
-    fps: {
-        forceSetTimeout: true,
-        target: 60
-    },
+    // fps: {
+    //     forceSetTimeout: true,
+    //     target: 60
+    // },
     
     scene: [ Menu, Play ]
     

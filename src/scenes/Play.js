@@ -98,6 +98,20 @@ class Play extends Phaser.Scene {
             }
         });
 
+        this.physics.add.overlap(this.player, this.platformGroup, function (_player, _platform)
+        {
+            if (_player.body.touching.right && _platform.body.touching.left)
+            {
+                
+                    this.speed = 0;
+                    console.log("set speed to zero!");
+                    this.isTouchingObstacle = true;
+                    //this.setSpeedZero();
+                    //this.updatePlatformSpeeds();
+                
+            }
+        });
+
         this.updatePlatformSpeeds();
 
 
@@ -150,16 +164,19 @@ class Play extends Phaser.Scene {
 
     preventPlatformInches(){
         this.platformPool.getChildren().forEach(function (platform) {
-            platform.x += 1;
+            platform.x += 3;
         }, this);
 
         this.platformGroup.getChildren().forEach(function (platform) {
-            platform.x += 1;
+            platform.x += 3;
             
         }, this);
 
         this.floor.tilePositionX -= 1;
+        this.player.x -= 1;
     }
+
+    
 
     update(time, delta) {
 
@@ -172,18 +189,22 @@ class Play extends Phaser.Scene {
             this.scene.restart();
         }
 
-        if(this.player.body.touching.right == true){
+
+        if(this.player.body.touching.right == true || this.player.body.embedded == true){
             this.speed = 0;
             this.updatePlatformSpeeds();
             this.isTouchingObstacle = true;
-           this.preventPlatformInches();
+            //this.preventPlatformInches();
         }
         else{
             
-            if(this.speed < 400 && !this.isTouchingObstacle){
+            if(this.speed < 700 && !this.isTouchingObstacle){
                 this.speed += 3;
+                
             }
+            
             this.isTouchingObstacle = false;
+
             this.updatePlatformSpeeds();
             this.floor.tilePositionX += this.speed/70;
         }
