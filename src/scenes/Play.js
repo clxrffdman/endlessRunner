@@ -46,6 +46,7 @@ class Play extends Phaser.Scene {
 
         keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
         keyUP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+        keyDOWN = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
         keyR = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
         keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
         keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
@@ -66,6 +67,8 @@ class Play extends Phaser.Scene {
                 platform.scene.platformPool.add(platform)
             }
         });
+
+        this.coinGroup = this.add.group();
 
         // pool
         this.platformPool = this.add.group({
@@ -133,7 +136,7 @@ class Play extends Phaser.Scene {
         if (this.platformPool.getLength()) {
             platform = this.platformPool.getFirst();
             platform.x = posX;
-            platform.y = Phaser.Math.Between(game.config.height - 50, 200);
+            platform.y = Phaser.Math.Between(game.config.height - 150, 200);
             platform.active = true;
             platform.visible = true;
             this.platformPool.remove(platform);
@@ -147,6 +150,7 @@ class Play extends Phaser.Scene {
 
         }
         platform.displayWidth = platformWidth;
+        platform.displayHeight = 40;
 
         this.nextPlatformDistance = Phaser.Math.Between(game.settings.spawnRange[0], game.settings.spawnRange[1]);
     }
@@ -198,8 +202,8 @@ class Play extends Phaser.Scene {
         }
         else{
             
-            if(this.speed < 700 && !this.isTouchingObstacle){
-                this.speed += 3;
+            if(this.speed < 1200 && !this.isTouchingObstacle){
+                this.speed += 2;
                 
             }
             

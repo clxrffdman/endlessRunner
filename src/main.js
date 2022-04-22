@@ -20,10 +20,10 @@ let config = {
             tileBias: 32
         }
     },
-    // fps: {
-    //     forceSetTimeout: true,
-    //     target: 60
-    // },
+    fps: {
+        forceSetTimeout: true,
+        target: 60
+    },
     
     scene: [ Menu, Play ]
     
