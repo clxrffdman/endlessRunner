@@ -3,42 +3,42 @@ class Play extends Phaser.Scene {
         super("playScene");
     }
 
-    
+
 
     preload() {
         // load images/tile sprites
         this.load.image('rocket', './assets/rocket_p1.png');
         this.load.image('starfield', './assets/starfield.png');
-        this.load.image('floor', './assets/floor.png');
+        this.load.image('platform', './assets/floor.png');
         // load spritesheet
-        this.load.spritesheet('explosion', './assets/explosion.png', {frameWidth: 64, frameHeight: 32, startFrame: 0, endFrame: 9});
+        this.load.spritesheet('explosion', './assets/explosion.png', { frameWidth: 64, frameHeight: 32, startFrame: 0, endFrame: 9 });
     }
-    
+
 
     create() {
         //backdrop
-        
+
         this.staticGroup = this.physics.add.staticGroup();
         this.playerGroup = this.physics.add.group();
         this.starfield = this.add.tileSprite(0, 0, 640, 480, 'starfield').setOrigin(0, 0);
-        this.floor = this.add.tileSprite(0, 600, 1280, 100, 'floor').setOrigin(0,0);
-         this.physics.add.existing(this.floor);
+        this.floor = this.add.tileSprite(0, 600, 1280, 100, 'platform').setOrigin(0, 0);
+        this.physics.add.existing(this.floor);
         this.staticGroup.add(this.floor);
         this.floor.body.allowGravity = false;
         this.floor.body.immovable = true;
 
         //UI
         this.add.rectangle(0, borderUISize + borderPadding, game.config.width, borderUISize * 2, 0x00FF00).setOrigin(0, 0);
-        this.add.rectangle(0, 0, game.config.width, borderUISize, 0xFFFFFF).setOrigin(0 ,0);
-        this.add.rectangle(0, game.config.height - borderUISize, game.config.width, borderUISize, 0xFFFFFF).setOrigin(0 ,0);
-        this.add.rectangle(0, 0, borderUISize, game.config.height, 0xFFFFFF).setOrigin(0 ,0);
-        this.add.rectangle(game.config.width - borderUISize, 0, borderUISize, game.config.height, 0xFFFFFF).setOrigin(0 ,0);
+        this.add.rectangle(0, 0, game.config.width, borderUISize, 0xFFFFFF).setOrigin(0, 0);
+        this.add.rectangle(0, game.config.height - borderUISize, game.config.width, borderUISize, 0xFFFFFF).setOrigin(0, 0);
+        this.add.rectangle(0, 0, borderUISize, game.config.height, 0xFFFFFF).setOrigin(0, 0);
+        this.add.rectangle(game.config.width - borderUISize, 0, borderUISize, game.config.height, 0xFFFFFF).setOrigin(0, 0);
 
-        
+
 
         //spaceships
-        this.player = new Player(this, game.config.width/4, game.config.height - borderPadding - borderUISize - 150, 'rocket', Phaser.AUTO, 5).setOrigin(0.5,0);
-        
+        this.player = new Player(this, game.config.width / 4, game.config.height - borderPadding - borderUISize - 150, 'rocket', Phaser.AUTO, 5).setOrigin(0.5, 0);
+
 
         this.physics.add.collider(this.player, this.floor);
 
@@ -53,31 +53,80 @@ class Play extends Phaser.Scene {
         keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
         keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
 
-        
 
-        
+
+
         this.gameOver = false;
 
-        //clock
+        // group with all active platforms.
+        this.platformGroup = this.add.group({
+
+            // once a platform is removed, it's added to the pool
+            removeCallback: function (platform) {
+                platform.scene.platformPool.add(platform)
+            }
+        });
+
+        // pool
+        this.platformPool = this.add.group({
+
+            // once a platform is removed from the pool, it's added to the active platforms group
+            removeCallback: function (platform) {
+                platform.scene.platformGroup.add(platform)
+            }
+        });
+
+        // number of consecutive jumps made by the player
+        this.playerJumps = 0;
+
+        // adding a platform to the game, the arguments are platform width and x position
+        this.addPlatform(game.config.width, game.config.width / 2);
+
+        // setting collisions between the player and the platform group
+        this.physics.add.collider(this.player, this.platformGroup);
         
+        this.speed = 350;
         
+
+
+    }
+
+    // the core of the script: platform are added from the pool or created on the fly
+    addPlatform(platformWidth, posX) {
+        let platform;
+        if (this.platformPool.getLength()) {
+            platform = this.platformPool.getFirst();
+            platform.x = posX;
+            platform.active = true;
+            platform.visible = true;
+            this.platformPool.remove(platform);
+        }
+        else {
+            platform = this.physics.add.sprite(posX, game.config.height * 0.8, "platform");
+            // platform.setImmovable(true);
+            platform.setVelocityX(game.settings.platformStartSpeed * -1);
+            this.platformGroup.add(platform);
+            
+            
+        }
+        platform.displayWidth = platformWidth;
+        
+        this.nextPlatformDistance = Phaser.Math.Between(game.settings.spawnRange[0], game.settings.spawnRange[1]);
     }
 
 
-    
-
     update(time, delta) {
 
-        
+
         //console.log(this.isGround);
 
 
-        if(this.gameOver && Phaser.Input.Keyboard.JustDown(keyR)) {
+        if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyR)) {
             game.settings.spaceshipSpeed = 4;
-            this.scene.restart();    
+            this.scene.restart();
         }
 
-        if(this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)) {
+        if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)) {
             this.scene.start("menuScene");
         }
 
@@ -85,25 +134,41 @@ class Play extends Phaser.Scene {
         this.starfield.tilePositionX -= 4;
         this.floor.tilePositionX += 7;
 
-        if(!this.gameOver) {
+        if (!this.gameOver) {
 
-            
-            
+
+
             this.player.update();
-            
+
         }
 
+        // recycling platforms
+        let minDistance = game.config.width;
+        this.platformGroup.getChildren().forEach(function(platform){
+            let platformDistance = game.config.width - platform.x - platform.displayWidth / 2;
+            minDistance = Math.min(minDistance, platformDistance);
+            if(platform.x < - platform.displayWidth / 2){
+                this.platformGroup.killAndHide(platform);
+                this.platformGroup.remove(platform);
+            }
+        }, this);
+ 
+        // adding new platforms
+        if(minDistance > this.nextPlatformDistance){
+            var nextPlatformWidth = Phaser.Math.Between(game.settings.platformSizeRange[0], game.settings.platformSizeRange[1]);
+            this.addPlatform(nextPlatformWidth, game.config.width + nextPlatformWidth / 2);
+        }
         // check collisions
-        
-        
+
+
     }
 
-    checkExplosionCollision(rocket, ship, explosionRadius){
-        if (rocket.x - explosionRadius < ship.x + ship.width && 
-            rocket.x + rocket.width + explosionRadius > ship.x && 
+    checkExplosionCollision(rocket, ship, explosionRadius) {
+        if (rocket.x - explosionRadius < ship.x + ship.width &&
+            rocket.x + rocket.width + explosionRadius > ship.x &&
             rocket.y - explosionRadius < ship.y + ship.height &&
-            rocket.height + rocket.y + explosionRadius > ship. y) {
-                return true;
+            rocket.height + rocket.y + explosionRadius > ship.y) {
+            return true;
         } else {
             return false;
         }
@@ -111,41 +176,41 @@ class Play extends Phaser.Scene {
 
     checkCollision(rocket, ship) {
 
-        if (rocket.x < ship.x + ship.width && 
-            rocket.x + rocket.width > ship.x && 
+        if (rocket.x < ship.x + ship.width &&
+            rocket.x + rocket.width > ship.x &&
             rocket.y < ship.y + ship.height &&
-            rocket.height + rocket.y > ship. y) {
-                if(rocket.isPowered()){
-                    if(this.checkExplosionCollision(rocket, this.ship01, 500)){
-                        this.shipExplode(this.ship01);
-                        game.settings.spaceshipSpeed++;
-                    }
-                    if(this.checkExplosionCollision(rocket, this.ship02, 500)){
-                        this.shipExplode(this.ship02);
-                        game.settings.spaceshipSpeed++;
-                    }
-                    if(this.checkExplosionCollision(rocket, this.ship03, 500)){
-                        this.shipExplode(this.ship03);
-                        game.settings.spaceshipSpeed++;
-                    }
-
-
-
-
+            rocket.height + rocket.y > ship.y) {
+            if (rocket.isPowered()) {
+                if (this.checkExplosionCollision(rocket, this.ship01, 500)) {
+                    this.shipExplode(this.ship01);
+                    game.settings.spaceshipSpeed++;
                 }
-                return true;
+                if (this.checkExplosionCollision(rocket, this.ship02, 500)) {
+                    this.shipExplode(this.ship02);
+                    game.settings.spaceshipSpeed++;
+                }
+                if (this.checkExplosionCollision(rocket, this.ship03, 500)) {
+                    this.shipExplode(this.ship03);
+                    game.settings.spaceshipSpeed++;
+                }
+
+
+
+
+            }
+            return true;
         } else {
             return false;
         }
-            
-        
-        
-        
+
+
+
+
     }
 
     shipExplode(ship) {
         // hide ship
-        ship.alpha = 0;                         
+        ship.alpha = 0;
         // create explosion at ship position
         let boom = this.add.sprite(ship.x, ship.y, 'explosion').setOrigin(0, 0);
         boom.anims.play('explode');
@@ -156,9 +221,9 @@ class Play extends Phaser.Scene {
             boom.destroy();                       // remove explosion
         });
         this.p1Score += ship.points;
-        this.scoreLeft.text = this.p1Score; 
+        this.scoreLeft.text = this.p1Score;
         this.currentTime += 1000;
-        
+
         this.sound.play('sfx_explosion');
-      }
+    }
 }

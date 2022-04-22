@@ -11,18 +11,21 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         //this.setBounce(1, 1);
         this.setCollideWorldBounds(true);
         this.body.onWorldBounds = true;
+        this.body.setGravityY(300);
+        
 
         
     }
 
     doJump(){
-        this.setVelocity(0, -200);
+        this.setVelocity(0, -500);
         this.isGrounded = false;
     }
 
 
     update(){
         this.body.velocity.x = 0;
+        this.body.x = game.config.width / 4;
 
         // if(this.scene.isGround){
         //     this.isGrounded = true;
