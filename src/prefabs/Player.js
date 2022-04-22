@@ -18,7 +18,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     doJump(){
-        this.setVelocity(0, -500);
+        this.setVelocity(0, -400);
         this.isGrounded = false;
     }
 
@@ -30,6 +30,10 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         // if(this.scene.isGround){
         //     this.isGrounded = true;
         // }
+        if(this.body.onWall()){
+            //console.log("set speed to 0");
+            this.scene.speed = 0;
+        }
         if(this.body.onFloor()){
             this.isGrounded = true;
         }

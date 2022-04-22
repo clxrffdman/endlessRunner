@@ -78,18 +78,40 @@ class Play extends Phaser.Scene {
 
         // number of consecutive jumps made by the player
         this.playerJumps = 0;
-
+        this.speed = 350;
+        this.isTouchingObstacle = false;
         // adding a platform to the game, the arguments are platform width and x position
-        this.addPlatform(game.config.width, game.config.width / 2);
+        this.addPlatform(game.config.width/5, game.config.width / 1.5);
 
         // setting collisions between the player and the platform group
-        this.physics.add.collider(this.player, this.platformGroup);
-        
-        this.speed = 350;
-        
+        this.physics.add.collider(this.player, this.platformGroup, function (_player, _platform)
+        {
+            if (_player.body.touching.right && _platform.body.touching.left)
+            {
+                
+                    this.speed = 0;
+                    console.log("set speed to zero!");
+                    this.isTouchingObstacle = true;
+                    //this.setSpeedZero();
+                    //this.updatePlatformSpeeds();
+                
+            }
+        });
+
+        this.updatePlatformSpeeds();
+
+
+
 
 
     }
+
+    setSpeedZero(){
+
+        this.speed = 0;
+        console.log(this.speed + " current speed");
+    }
+
 
     // the core of the script: platform are added from the pool or created on the fly
     addPlatform(platformWidth, posX) {
@@ -97,23 +119,47 @@ class Play extends Phaser.Scene {
         if (this.platformPool.getLength()) {
             platform = this.platformPool.getFirst();
             platform.x = posX;
+            platform.y = Phaser.Math.Between(game.config.height - 50, 200);
             platform.active = true;
             platform.visible = true;
             this.platformPool.remove(platform);
         }
         else {
             platform = this.physics.add.sprite(posX, game.config.height * 0.8, "platform");
+            this.physics.add.collider(this.player, this.platform);
             // platform.setImmovable(true);
-            platform.setVelocityX(game.settings.platformStartSpeed * -1);
             this.platformGroup.add(platform);
-            
-            
+
+
         }
         platform.displayWidth = platformWidth;
-        
+
         this.nextPlatformDistance = Phaser.Math.Between(game.settings.spawnRange[0], game.settings.spawnRange[1]);
     }
 
+    updatePlatformSpeeds(){
+        this.platformPool.getChildren().forEach(function (platform) {
+            platform.setVelocityX(this.speed * -1);
+        }, this);
+
+        this.platformGroup.getChildren().forEach(function (platform) {
+            platform.setVelocityX(this.speed * -1);
+            
+        }, this);
+    }
+
+    preventPlatformInches(){
+        this.platformPool.getChildren().forEach(function (platform) {
+            platform.x += 1;
+        }, this);
+
+        this.platformGroup.getChildren().forEach(function (platform) {
+            platform.x += 1;
+            
+        }, this);
+
+        this.floor.tilePositionX -= 1;
+    }
 
     update(time, delta) {
 
@@ -126,104 +172,125 @@ class Play extends Phaser.Scene {
             this.scene.restart();
         }
 
+        if(this.player.body.touching.right == true){
+            this.speed = 0;
+            this.updatePlatformSpeeds();
+            this.isTouchingObstacle = true;
+           this.preventPlatformInches();
+        }
+        else{
+            
+            if(this.speed < 400 && !this.isTouchingObstacle){
+                this.speed += 3;
+            }
+            this.isTouchingObstacle = false;
+            this.updatePlatformSpeeds();
+            this.floor.tilePositionX += this.speed/70;
+        }
+
         if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)) {
             this.scene.start("menuScene");
         }
 
         //scroll backdrop
         this.starfield.tilePositionX -= 4;
-        this.floor.tilePositionX += 7;
+        
 
         if (!this.gameOver) {
 
 
-
+            
             this.player.update();
 
         }
 
-        // recycling platforms
-        let minDistance = game.config.width;
-        this.platformGroup.getChildren().forEach(function(platform){
-            let platformDistance = game.config.width - platform.x - platform.displayWidth / 2;
-            minDistance = Math.min(minDistance, platformDistance);
-            if(platform.x < - platform.displayWidth / 2){
-                this.platformGroup.killAndHide(platform);
-                this.platformGroup.remove(platform);
-            }
-        }, this);
- 
-        // adding new platforms
-        if(minDistance > this.nextPlatformDistance){
-            var nextPlatformWidth = Phaser.Math.Between(game.settings.platformSizeRange[0], game.settings.platformSizeRange[1]);
-            this.addPlatform(nextPlatformWidth, game.config.width + nextPlatformWidth / 2);
-        }
+        
+
+// recycling platforms
+let minDistance = game.config.width;
+this.platformGroup.getChildren().forEach(function (platform) {
+
+    let platformDistance = game.config.width - platform.x - platform.displayWidth / 2;
+    minDistance = Math.min(minDistance, platformDistance);
+    platform.setVelocityY(0);
+    platform.setPushable(false);
+    if (platform.x < - platform.displayWidth / 2) {
+        this.platformGroup.killAndHide(platform);
+        this.platformGroup.remove(platform);
+    }
+}, this);
+
+// adding new platforms
+if (minDistance > this.nextPlatformDistance) {
+    var nextPlatformWidth = Phaser.Math.Between(game.settings.platformSizeRange[0], game.settings.platformSizeRange[1]);
+    this.addPlatform(nextPlatformWidth, game.config.width + nextPlatformWidth / 2);
+}
         // check collisions
 
 
     }
 
-    checkExplosionCollision(rocket, ship, explosionRadius) {
-        if (rocket.x - explosionRadius < ship.x + ship.width &&
-            rocket.x + rocket.width + explosionRadius > ship.x &&
-            rocket.y - explosionRadius < ship.y + ship.height &&
-            rocket.height + rocket.y + explosionRadius > ship.y) {
-            return true;
-        } else {
-            return false;
-        }
+checkExplosionCollision(rocket, ship, explosionRadius) {
+    if (rocket.x - explosionRadius < ship.x + ship.width &&
+        rocket.x + rocket.width + explosionRadius > ship.x &&
+        rocket.y - explosionRadius < ship.y + ship.height &&
+        rocket.height + rocket.y + explosionRadius > ship.y) {
+        return true;
+    } else {
+        return false;
     }
+}
 
-    checkCollision(rocket, ship) {
+checkCollision(rocket, ship) {
 
-        if (rocket.x < ship.x + ship.width &&
-            rocket.x + rocket.width > ship.x &&
-            rocket.y < ship.y + ship.height &&
-            rocket.height + rocket.y > ship.y) {
-            if (rocket.isPowered()) {
-                if (this.checkExplosionCollision(rocket, this.ship01, 500)) {
-                    this.shipExplode(this.ship01);
-                    game.settings.spaceshipSpeed++;
-                }
-                if (this.checkExplosionCollision(rocket, this.ship02, 500)) {
-                    this.shipExplode(this.ship02);
-                    game.settings.spaceshipSpeed++;
-                }
-                if (this.checkExplosionCollision(rocket, this.ship03, 500)) {
-                    this.shipExplode(this.ship03);
-                    game.settings.spaceshipSpeed++;
-                }
-
-
-
-
+    if (rocket.x < ship.x + ship.width &&
+        rocket.x + rocket.width > ship.x &&
+        rocket.y < ship.y + ship.height &&
+        rocket.height + rocket.y > ship.y) {
+        if (rocket.isPowered()) {
+            if (this.checkExplosionCollision(rocket, this.ship01, 500)) {
+                this.shipExplode(this.ship01);
+                game.settings.spaceshipSpeed++;
             }
-            return true;
-        } else {
-            return false;
+            if (this.checkExplosionCollision(rocket, this.ship02, 500)) {
+                this.shipExplode(this.ship02);
+                game.settings.spaceshipSpeed++;
+            }
+            if (this.checkExplosionCollision(rocket, this.ship03, 500)) {
+                this.shipExplode(this.ship03);
+                game.settings.spaceshipSpeed++;
+            }
+
+
+
+
         }
-
-
-
-
+        return true;
+    } else {
+        return false;
     }
 
-    shipExplode(ship) {
-        // hide ship
-        ship.alpha = 0;
-        // create explosion at ship position
-        let boom = this.add.sprite(ship.x, ship.y, 'explosion').setOrigin(0, 0);
-        boom.anims.play('explode');
-        boom.on('animationcomplete', () => {
-            ship.reset();                         // reset position
-            ship.alpha = 1;                       // make ship visible
-            ship.upSpeed();
-            boom.destroy();                       // remove explosion
-        });
-        this.p1Score += ship.points;
-        this.scoreLeft.text = this.p1Score;
-        this.currentTime += 1000;
 
-        this.sound.play('sfx_explosion');
-    }
+
+
+}
+
+shipExplode(ship) {
+    // hide ship
+    ship.alpha = 0;
+    // create explosion at ship position
+    let boom = this.add.sprite(ship.x, ship.y, 'explosion').setOrigin(0, 0);
+    boom.anims.play('explode');
+    boom.on('animationcomplete', () => {
+        ship.reset();                         // reset position
+        ship.alpha = 1;                       // make ship visible
+        ship.upSpeed();
+        boom.destroy();                       // remove explosion
+    });
+    this.p1Score += ship.points;
+    this.scoreLeft.text = this.p1Score;
+    this.currentTime += 1000;
+
+    this.sound.play('sfx_explosion');
+}
 }
