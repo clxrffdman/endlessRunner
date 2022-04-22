@@ -136,6 +136,7 @@ class Play extends Phaser.Scene {
         if (this.platformPool.getLength()) {
             platform = this.platformPool.getFirst();
             platform.x = posX;
+            //spawn platform at random y point (fix later)
             platform.y = Phaser.Math.Between(game.config.height - 150, 200);
             platform.active = true;
             platform.visible = true;
