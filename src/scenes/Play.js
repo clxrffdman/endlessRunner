@@ -260,6 +260,7 @@ class Play extends Phaser.Scene {
             this.isTouchingObstacle = false;
 
             this.updatePlatformSpeeds();
+            this.distanceTravelled
             this.floor.tilePositionX += this.speed / 70;
         }
 
