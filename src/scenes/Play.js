@@ -115,6 +115,9 @@ class Play extends Phaser.Scene {
         this.hungerText = this.add.text(game.config.width - borderPadding * 15, borderUISize + borderPadding * 2, this.currentTime / 1000, scoreConfig);
         this.hungerText.text = 0;
 
+        this.distanceText = this.add.text(borderPadding * 15, borderUISize + borderPadding * 2, this.currentTime / 1000, scoreConfig);
+        this.distanceText.text = 0;
+
         // adding a platform to the game, the arguments are platform width and x position
         this.addPlatform(game.config.width / 5, game.config.width / 1.5);
         // setting collisions between the player and the platform group
@@ -237,11 +240,27 @@ class Play extends Phaser.Scene {
         console.log(this.hunger);
         this.hungerText.text = this.hunger;
 
-
-        if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyR)) {
-            game.settings.spaceshipSpeed = 4;
-            this.scene.restart();
+        if(!this.gameOver){
+            this.hunger -= this.hungerDrain;
+            this.distanceTravelled += this.speed;
+            this.distanceText.text = Math.round(this.distanceTravelled/1000,0);
         }
+
+        if(!this.gameOver && this.hunger <= 0){
+            this.gameOver = true;
+        }
+
+        if(this.gameOver){
+
+            this.speed = 0;
+            this.player.setGravityY(0);
+            this.player.setVelocityY(0);
+            if(Phaser.Input.Keyboard.JustDown(keyR)){
+                this.scene.restart();
+            }
+        }
+
+        
 
 
         if (this.player.body.touching.right == true || this.player.body.embedded == true) {
@@ -260,7 +279,7 @@ class Play extends Phaser.Scene {
             this.isTouchingObstacle = false;
 
             this.updatePlatformSpeeds();
-            this.distanceTravelled
+            
             this.floor.tilePositionX += this.speed / 70;
         }
 
