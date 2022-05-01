@@ -9,6 +9,7 @@ class Play extends Phaser.Scene {
     preload() {
         // load images/tile sprites
         this.load.image('rocket', './assets/rocket_p1.png');
+        this.load.image('turtle', './assets/turtle.png');
         this.load.image('starfield', './assets/starfield.png');
         this.load.image('platform', './assets/floor.png');
         this.load.image('hungerBar', './assets/hungerbarempty.png');
@@ -40,7 +41,8 @@ class Play extends Phaser.Scene {
 
 
         //spaceships
-        this.player = new Player(this, game.config.width / 4, game.config.height - borderPadding - borderUISize - 150, 'rocket', Phaser.AUTO, 5).setOrigin(0.5, 0);
+        this.player = new Player(this, game.config.width / 4, game.config.height - borderPadding - borderUISize - 150, 'turtle', Phaser.AUTO, 5).setOrigin(0.5, 0.5);
+        this.player.setScale(0.075);
 
 
         this.physics.add.collider(this.player, this.floor);
