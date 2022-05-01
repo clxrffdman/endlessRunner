@@ -11,6 +11,8 @@ class Play extends Phaser.Scene {
         this.load.image('rocket', './assets/rocket_p1.png');
         this.load.image('starfield', './assets/starfield.png');
         this.load.image('platform', './assets/floor.png');
+        this.load.image('hungerBar', './assets/hungerbarempty.png');
+        this.load.image('hungerFill', './assets/hungerPixel.png');
         // load spritesheet
         this.load.spritesheet('explosion', './assets/explosion.png', { frameWidth: 64, frameHeight: 32, startFrame: 0, endFrame: 9 });
     }
@@ -96,6 +98,9 @@ class Play extends Phaser.Scene {
         }
         scoreConfig.fixedWidth = 0;
 
+        this.hungerFill = this.add.image(game.config.width - borderPadding * 15, borderUISize + borderPadding * 2, "hungerFill").setOrigin(0,0.5);
+        this.hungerBar = this.add.image(game.config.width - borderPadding * 15, borderUISize + borderPadding * 2, "hungerBar").setOrigin(0,0.5);;
+        
         // pool
         this.platformPool = this.add.group({
 
@@ -105,6 +110,9 @@ class Play extends Phaser.Scene {
             }
         });
 
+
+
+
         // number of consecutive jumps made by the player
         this.playerJumps = 0;
         this.speed = 350;
@@ -112,8 +120,7 @@ class Play extends Phaser.Scene {
         this.isTouchingObstacle = false;
         this.distanceTravelled = 0;
         this.hunger = 1000;
-        this.hungerText = this.add.text(game.config.width - borderPadding * 15, borderUISize + borderPadding * 2, this.currentTime / 1000, scoreConfig);
-        this.hungerText.text = 0;
+
 
         this.distanceText = this.add.text(borderPadding * 15, borderUISize + borderPadding * 2, this.currentTime / 1000, scoreConfig);
         this.distanceText.text = 0;
@@ -238,10 +245,11 @@ class Play extends Phaser.Scene {
 
 
         console.log(this.hunger);
-        this.hungerText.text = this.hunger;
+
 
         if(!this.gameOver){
             this.hunger -= this.hungerDrain;
+            this.hungerFill.scaleX = 128 * ((this.hunger/1000));
             this.distanceTravelled += this.speed;
             this.distanceText.text = Math.round(this.distanceTravelled/1000,0);
         }
