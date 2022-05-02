@@ -17,6 +17,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.jumpHeld = false;
         this.isSlide = false;
         this.jumpAmount = 0;
+        this.jumpVelocity = 425;
 
         
     }
@@ -31,12 +32,16 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         }
 
         if(this.jumpHeld && (this.body.velocity.y < 0 || this.jumpAmount < 2) && this.currentJumpTime < this.maxJumpTime){
-            this.setVelocity(0, -425);
+            this.setVelocity(0, -this.jumpVelocity);
             //this.setVelocity(0, -300 + (50*((this.maxJumpTime - this.currentJumpTime)/this.maxJumpTime)));
         }
 
         
         this.isGrounded = false;
+    }
+
+    modifyJumpHeight(arg){
+        this.jumpVelocity = arg;
     }
 
 

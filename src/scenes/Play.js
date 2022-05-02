@@ -9,6 +9,7 @@ class Play extends Phaser.Scene {
     preload() {
         // load images/tile sprites
         this.load.image('rocket', './assets/rocket_p1.png');
+        this.load.image('spike', './assets/spike.png'); 
         this.load.image('turtle', './assets/turtle.png');
         this.load.image('starfield', './assets/starfield.png');
         // this.load.image('platform', './assets/floor.png');
@@ -42,8 +43,9 @@ class Play extends Phaser.Scene {
 
 
         //spaceships
-        this.player = new Player(this, game.config.width / 4, game.config.height - borderPadding - borderUISize - 150, 'turtle', Phaser.AUTO, 5).setOrigin(0.5, 0.5);
+        this.player = new Player(this, game.config.width / 4, game.config.height - borderPadding - borderUISize - 150, 'turtle', Phaser.AUTO, 5).setOrigin(0.5, 0);
         this.player.setScale(0.075);
+        
 
 
         this.physics.add.collider(this.player, this.floor);
@@ -64,6 +66,10 @@ class Play extends Phaser.Scene {
 
 
         this.gameOver = false;
+        this.growth = 0;
+        this.speedUpgrade = 0;
+        this.eatUpgrade = 0;
+        this.invincibleframes = 0;
 
         // group with all active platforms.
         this.platformGroup = this.add.group({
@@ -77,15 +83,9 @@ class Play extends Phaser.Scene {
         this.coins = this.add.group();
         this.coins.enableBody = true;
 
-        for (var i = 0; i < 9; i++) {
-            this.coin = this.physics.add.sprite(i * 50 + 500, 500, "rocket");
+        this.spikes = this.add.group();
+        this.spikes.enableBody = true;
 
-            this.physics.add.overlap(this.player, this.coin);
-            // platform.setImmovable(true);
-            this.coins.add(this.coin);
-
-
-        }
 
         let scoreConfig = {
             fontFamily: 'Courier',
@@ -119,7 +119,8 @@ class Play extends Phaser.Scene {
         // number of consecutive jumps made by the player
         this.playerJumps = 0;
         this.speed = 350;
-        this.hungerDrain = 1;
+        this.accel = 1.2;
+        this.hungerDrain = 0.5;
         this.isTouchingObstacle = false;
         this.distanceTravelled = 0;
         this.hunger = 1000;
@@ -162,11 +163,28 @@ class Play extends Phaser.Scene {
 
             this.hunger += 50;
             if(this.hunger > game.settings.maxHunger){
-                this.hunger = maxHunger;
+                this.hunger = game.settings.maxHunger;
             }
             //console.log(this.hunger);
             
             coin.destroy();
+
+
+
+
+
+        },null,this);
+
+        this.physics.add.overlap(this.player, this.spikes, function (player, spike) {
+
+
+            if(this.invincibleframes <= 0){
+                this.hunger -= 80;
+                this.invincibleframes = 120;
+                this.setSpeedZero();
+            }
+
+            
 
 
 
@@ -198,13 +216,13 @@ class Play extends Phaser.Scene {
             platform.x = posX;
             //spawn platform at random y point (fix later)
             // platform.y = Phaser.Math.Between(game.config.height - 150, 200);
-            platform.y = Phaser.Math.RoundTo(Phaser.Math.Between(game.config.height - 150, 200),0,30);
+            platform.y = Phaser.Math.RoundTo(Phaser.Math.Between(game.config.height - 150, 400),0,30);
             platform.active = true;
             platform.visible = true;
             this.platformPool.remove(platform);
         }
         else {
-            platform = this.physics.add.sprite(posX, game.config.height * 0.8, "platform");
+            platform = this.physics.add.sprite(posX, game.config.height * 0.8, "platform").setOrigin(0,0.5);
             
             this.physics.add.collider(this.player, this.platform);
             // platform.setImmovable(true);
@@ -214,13 +232,29 @@ class Play extends Phaser.Scene {
         }
         platform.displayWidth = platformWidth;
         
-        for(let i = 0; i < platformWidth; i += 50){
-            this.coin = this.physics.add.sprite(posX - i + 50, platform.y - 50, "rocket");
-
-            this.physics.add.overlap(this.player, this.coin);
-            // platform.setImmovable(true);
-            this.coins.add(this.coin);
+        var d = Phaser.Math.Between(1, 8);
+        if(d == 1){
+            for(let i = 0; i < platformWidth - 25; i += 50){
+                this.spike = this.physics.add.sprite((posX + i + 25), platform.y - 50, "spike").setOrigin(0.5,0.5);
+    
+                this.physics.add.overlap(this.player, this.spike);
+                // platform.setImmovable(true);
+                this.spikes.add(this.spike);
+                
+            }
         }
+        else if(d < 7){
+            for(let i = 0; i < platformWidth - 25; i += 50){
+                this.coin = this.physics.add.sprite((posX + i + 25), platform.y - 50, "rocket").setOrigin(0.5,0.5);
+    
+                this.physics.add.overlap(this.player, this.coin);
+                // platform.setImmovable(true);
+                this.coins.add(this.coin);
+                
+            }
+        }
+
+        
         platform.displayHeight = 40;
 
         this.nextPlatformDistance = Phaser.Math.Between(game.settings.spawnRange[0], game.settings.spawnRange[1]);
@@ -238,6 +272,11 @@ class Play extends Phaser.Scene {
 
         this.coins.getChildren().forEach(function (coin) {
             coin.setVelocityX(this.speed * -1);
+
+        }, this);
+
+        this.spikes.getChildren().forEach(function (spike) {
+            spike.setVelocityX(this.speed * -1);
 
         }, this);
     }
@@ -266,9 +305,28 @@ class Play extends Phaser.Scene {
 
         if(!this.gameOver){
             this.hunger -= this.hungerDrain;
+            if(this.invincibleframes > 0){
+                this.invincibleframes--;
+            }
             this.hungerFill.scaleX = 128 * ((this.hunger/game.settings.maxHunger));
             this.distanceTravelled += this.speed;
             this.distanceText.text = Math.round(this.distanceTravelled/1000,0);
+        }
+
+        if(this.growth == 0 && this.distanceTravelled/1000 > 4000){
+            this.growth = 1;
+            this.accel = 2;
+            this.hungerDrain = 0.65;
+            this.player.setScale(0.09);
+            this.player.modifyJumpHeight(550)
+        }
+
+        if(this.growth == 1 && this.distanceTravelled/1000 > 7000){
+            this.growth = 2;
+            this.accel = 2.5;
+            this.hungerDrain = 0.75;
+            this.player.setScale(0.12);
+            this.player.modifyJumpHeight(575);
         }
 
         if(!this.gameOver && this.hunger <= 0){
@@ -296,8 +354,8 @@ class Play extends Phaser.Scene {
         }
         else {
 
-            if (this.speed < 1200 && !this.isTouchingObstacle) {
-                this.speed += 2;
+            if (this.speed < 1000 && !this.isTouchingObstacle) {
+                this.speed += this.accel;
 
             }
 
