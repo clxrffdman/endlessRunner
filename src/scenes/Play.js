@@ -11,9 +11,10 @@ class Play extends Phaser.Scene {
         this.load.image('rocket', './assets/rocket_p1.png');
         this.load.image('turtle', './assets/turtle.png');
         this.load.image('starfield', './assets/starfield.png');
-        this.load.image('platform', './assets/floor.png');
+        // this.load.image('platform', './assets/floor.png');
         this.load.image('hungerBar', './assets/hungerbarempty.png');
         this.load.image('hungerFill', './assets/hungerPixel.png');
+        this.load.image('platform', './assets/testPlatformTile.png');
         // load spritesheet
         this.load.spritesheet('explosion', './assets/explosion.png', { frameWidth: 64, frameHeight: 32, startFrame: 0, endFrame: 9 });
     }
@@ -158,8 +159,12 @@ class Play extends Phaser.Scene {
 
         this.physics.add.overlap(this.player, this.coins, function (player, coin) {
 
-            this.hunger += 10;
-            console.log(this.hunger);
+
+            this.hunger += 50;
+            if(this.hunger > game.settings.maxHunger){
+                this.hunger = maxHunger;
+            }
+            //console.log(this.hunger);
             
             coin.destroy();
 
@@ -181,7 +186,7 @@ class Play extends Phaser.Scene {
     setSpeedZero() {
 
         this.speed = 0;
-        console.log(this.speed + " current speed");
+        //console.log(this.speed + " current speed");
     }
 
 
@@ -192,13 +197,15 @@ class Play extends Phaser.Scene {
             platform = this.platformPool.getFirst();
             platform.x = posX;
             //spawn platform at random y point (fix later)
-            platform.y = Phaser.Math.Between(game.config.height - 150, 200);
+            // platform.y = Phaser.Math.Between(game.config.height - 150, 200);
+            platform.y = Phaser.Math.RoundTo(Phaser.Math.Between(game.config.height - 150, 200),0,30);
             platform.active = true;
             platform.visible = true;
             this.platformPool.remove(platform);
         }
         else {
             platform = this.physics.add.sprite(posX, game.config.height * 0.8, "platform");
+            
             this.physics.add.collider(this.player, this.platform);
             // platform.setImmovable(true);
             this.platformGroup.add(platform);
@@ -206,6 +213,14 @@ class Play extends Phaser.Scene {
 
         }
         platform.displayWidth = platformWidth;
+        
+        for(let i = 0; i < platformWidth; i += 50){
+            this.coin = this.physics.add.sprite(posX - i + 50, platform.y - 50, "rocket");
+
+            this.physics.add.overlap(this.player, this.coin);
+            // platform.setImmovable(true);
+            this.coins.add(this.coin);
+        }
         platform.displayHeight = 40;
 
         this.nextPlatformDistance = Phaser.Math.Between(game.settings.spawnRange[0], game.settings.spawnRange[1]);
@@ -246,12 +261,12 @@ class Play extends Phaser.Scene {
     update(time, delta) {
 
 
-        console.log(this.hunger);
+        //console.log(this.hunger);
 
 
         if(!this.gameOver){
             this.hunger -= this.hungerDrain;
-            this.hungerFill.scaleX = 128 * ((this.hunger/1000));
+            this.hungerFill.scaleX = 128 * ((this.hunger/game.settings.maxHunger));
             this.distanceTravelled += this.speed;
             this.distanceText.text = Math.round(this.distanceTravelled/1000,0);
         }
@@ -327,7 +342,9 @@ class Play extends Phaser.Scene {
 
         // adding new platforms
         if (minDistance > this.nextPlatformDistance) {
-            var nextPlatformWidth = Phaser.Math.Between(game.settings.platformSizeRange[0], game.settings.platformSizeRange[1]);
+            // var nextPlatformWidth = Phaser.Math.Between(game.settings.platformSizeRange[0], game.settings.platformSizeRange[1]);
+            var nextPlatformWidth = Math.round((Phaser.Math.Between(game.settings.platformSizeRange[0], game.settings.platformSizeRange[1]))/50)*50;
+            console.log(nextPlatformWidth);
             this.addPlatform(nextPlatformWidth, game.config.width + nextPlatformWidth / 2);
         }
         // check collisions

@@ -45,7 +45,8 @@ class Menu extends Phaser.Scene {
         playerGravity: 900,
         jumpForce: 400,
         playerStartPosition: 200,
-        jumps: 2
+        maxHunger: 2000,
+        jumps: 2,
       }
       this.sound.play('sfx_select');
       this.scene.start("playScene");
@@ -58,6 +59,7 @@ class Menu extends Phaser.Scene {
         playerGravity: 900,
         jumpForce: 400,
         playerStartPosition: 200,
+        maxHunger: 2000,
         jumps: 2
       }
       this.sound.play('sfx_select');
@@ -72,6 +74,7 @@ class Menu extends Phaser.Scene {
         playerGravity: 900,
         jumpForce: 400,
         playerStartPosition: 200,
+        maxHunger: 2000,
         jumps: 2
       }
       this.sound.play('sfx_select');
@@ -86,6 +89,7 @@ class Menu extends Phaser.Scene {
         playerGravity: 900,
         jumpForce: 400,
         playerStartPosition: 200,
+        maxHunger: 2000,
         jumps: 2
       }
       this.sound.play('sfx_select');

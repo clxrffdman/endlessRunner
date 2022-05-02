@@ -24,6 +24,7 @@ let config = {
         forceSetTimeout: true,
         target: 60
     },
+    resolution: 3,
     
     scene: [ Menu, Play ]
     
