@@ -34,16 +34,16 @@ class Play extends Phaser.Scene {
         this.floor.body.immovable = true;
 
         //UI
-        this.add.rectangle(0, borderUISize + borderPadding, game.config.width, borderUISize * 2, 0x00FF00).setOrigin(0, 0);
-        this.add.rectangle(0, 0, game.config.width, borderUISize, 0xFFFFFF).setOrigin(0, 0);
-        this.add.rectangle(0, game.config.height - borderUISize, game.config.width, borderUISize, 0xFFFFFF).setOrigin(0, 0);
-        this.add.rectangle(0, 0, borderUISize, game.config.height, 0xFFFFFF).setOrigin(0, 0);
-        this.add.rectangle(game.config.width - borderUISize, 0, borderUISize, game.config.height, 0xFFFFFF).setOrigin(0, 0);
+        this.add.rectangle(0, borderUISize + borderPadding, game.config.width, borderUISize * 2, 0xB8E1FF).setOrigin(0, 0.5).setDepth(1);
+        this.add.rectangle(0, 0, game.config.width, borderUISize, 0xFFFFFF).setOrigin(0, 0).setDepth(1);
+        this.add.rectangle(0, game.config.height - borderUISize, game.config.width, borderUISize, 0xFFFFFF).setOrigin(0, 0).setDepth(1);
+        this.add.rectangle(0, 0, borderUISize, game.config.height, 0xFFFFFF).setOrigin(0, 0).setDepth(1);
+        this.add.rectangle(game.config.width - borderUISize, 0, borderUISize, game.config.height, 0xFFFFFF).setOrigin(0, 0).setDepth(1);
 
 
 
         //spaceships
-        this.player = new Player(this, game.config.width / 4, game.config.height - borderPadding - borderUISize - 150, 'turtle', Phaser.AUTO, 5).setOrigin(0.5, 0);
+        this.player = new Player(this, game.config.width / 4, game.config.height - borderPadding - borderUISize - 150, 'turtle', Phaser.AUTO, 5).setOrigin(0.5, 0.5);
         this.player.setScale(0.075);
         
 
@@ -88,10 +88,10 @@ class Play extends Phaser.Scene {
 
 
         let scoreConfig = {
-            fontFamily: 'Courier',
+            fontFamily: 'Noto Sans',
             fontSize: '28px',
-            backgroundColor: '#F3B141',
-            color: '#843605',
+            // backgroundColor: '#F3B141',
+            color: '#376E60',
             align: 'right',
             padding: {
                 top: 5,
@@ -101,8 +101,9 @@ class Play extends Phaser.Scene {
         }
         scoreConfig.fixedWidth = 0;
 
-        this.hungerFill = this.add.image(game.config.width - borderPadding * 15, borderUISize + borderPadding * 2, "hungerFill").setOrigin(0,0.5);
-        this.hungerBar = this.add.image(game.config.width - borderPadding * 15, borderUISize + borderPadding * 2, "hungerBar").setOrigin(0,0.5);;
+        this.hungerFill = this.add.image(game.config.width - borderPadding * 15, borderUISize + borderPadding * 2, "hungerFill").setOrigin(0,0.5).setDepth(2);
+        this.hungerBar = this.add.image(game.config.width - borderPadding * 15, borderUISize + borderPadding * 2, "hungerBar").setOrigin(0,0.5).setDepth(2);
+        this.hungerText = this.add.text((game.config.width - borderPadding * 15) - 60, borderUISize + borderPadding * 2, "Hunger:", scoreConfig).setOrigin(0.5,0.5).setDepth(2);
         
         // pool
         this.platformPool = this.add.group({
@@ -126,7 +127,7 @@ class Play extends Phaser.Scene {
         this.hunger = 1000;
 
 
-        this.distanceText = this.add.text(borderPadding * 15, borderUISize + borderPadding * 2, this.currentTime / 1000, scoreConfig);
+        this.distanceText = this.add.text((borderPadding * 15)-80, borderUISize + borderPadding * 2, this.currentTime / 1000, scoreConfig).setOrigin(0,0.5).setDepth(2);
         this.distanceText.text = 0;
 
         // adding a platform to the game, the arguments are platform width and x position
@@ -182,6 +183,8 @@ class Play extends Phaser.Scene {
                 this.hunger -= 80;
                 this.invincibleframes = 120;
                 this.setSpeedZero();
+                this.speedUpgrade = 0;
+                this.eatUpgrade = 0;
             }
 
             
@@ -243,7 +246,7 @@ class Play extends Phaser.Scene {
                 
             }
         }
-        else if(d < 7){
+        else if(d < 8){
             for(let i = 0; i < platformWidth - 25; i += 50){
                 this.coin = this.physics.add.sprite((posX + i + 25), platform.y - 50, "rocket").setOrigin(0.5,0.5);
     
@@ -272,13 +275,20 @@ class Play extends Phaser.Scene {
 
         this.coins.getChildren().forEach(function (coin) {
             coin.setVelocityX(this.speed * -1);
+            if(coin.x <= 0 - coin.width){
+                coin.destroy();
+            }
 
         }, this);
 
         this.spikes.getChildren().forEach(function (spike) {
             spike.setVelocityX(this.speed * -1);
-
+            if(spike.x <= 0 - spike.width){
+                spike.destroy();
+            }
         }, this);
+
+
     }
 
     preventPlatformInches() {
@@ -310,7 +320,7 @@ class Play extends Phaser.Scene {
             }
             this.hungerFill.scaleX = 128 * ((this.hunger/game.settings.maxHunger));
             this.distanceTravelled += this.speed;
-            this.distanceText.text = Math.round(this.distanceTravelled/1000,0);
+            this.distanceText.text = "Distance Travelled - " + Math.round(this.distanceTravelled/1000,0);
         }
 
         if(this.growth == 0 && this.distanceTravelled/1000 > 4000){
@@ -318,6 +328,7 @@ class Play extends Phaser.Scene {
             this.accel = 2;
             this.hungerDrain = 0.65;
             this.player.setScale(0.09);
+            this.player.x += 5;
             this.player.modifyJumpHeight(550)
         }
 
@@ -326,6 +337,7 @@ class Play extends Phaser.Scene {
             this.accel = 2.5;
             this.hungerDrain = 0.75;
             this.player.setScale(0.12);
+            this.player.x += 5;
             this.player.modifyJumpHeight(575);
         }
 
@@ -338,6 +350,25 @@ class Play extends Phaser.Scene {
             this.speed = 0;
             this.player.setGravityY(0);
             this.player.setVelocityY(0);
+
+            let scoreConfig = {
+                fontFamily: 'Courier',
+                fontSize: '28px',
+                backgroundColor: '#F3B141',
+                color: '#843605',
+                align: 'right',
+                padding: {
+                    top: 5,
+                    bottom: 5,
+                },
+                fixedWidth: 100
+            }
+
+            scoreConfig.fixedWidth = 0;
+
+            this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
+            this.add.text(game.config.width/2, game.config.height/2 + 64, 'Press (R) to Restart or ← to Menu', scoreConfig).setOrigin(0.5);
+            
             if(Phaser.Input.Keyboard.JustDown(keyR)){
                 this.scene.restart();
             }

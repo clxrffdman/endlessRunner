@@ -1,6 +1,6 @@
-class Menu extends Phaser.Scene {
+class Tutorial extends Phaser.Scene {
   constructor() {
-    super("menuScene");
+    super("tutorialScene");
   }
 
   preload() {
@@ -23,10 +23,14 @@ class Menu extends Phaser.Scene {
       fixedWidth: 0
     }
 
-    this.add.text(game.config.width / 2, game.config.height / 2 - borderUISize - borderPadding, 'Hungry Harold', menuConfig).setOrigin(0.5);
+    this.add.text(game.config.width / 2, game.config.height / 5 - borderUISize - borderPadding, 'Controls', menuConfig).setOrigin(0.5);
+    this.add.text(game.config.width / 2, game.config.height / 4, 'Use ↑↓ arrows to move!', menuConfig).setOrigin(0.5);
+    this.add.text(game.config.width / 2, 1.3*(game.config.height / 4), 'Collect lettuce to grow!', menuConfig).setOrigin(0.5);
+    this.add.text(game.config.width / 2, 1.6*(game.config.height / 4), 'Spikes will slow you down!', menuConfig).setOrigin(0.5);
+    this.add.text(game.config.width / 2, 1.9*(game.config.height / 4), 'Avoid starvation at all costs!', menuConfig).setOrigin(0.5);
     menuConfig.backgroundColor = '#00FF00';
     menuConfig.color = '#000';
-    this.add.text(game.config.width / 2, game.config.height / 2, 'Press ↑ to start and ↓ for controls!', menuConfig).setOrigin(0.5);
+    this.add.text(game.config.width / 2, game.config.height / 2 + borderUISize + borderPadding, 'Press ↑ to return to menu!', menuConfig).setOrigin(0.5);
 
     keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
     keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
@@ -48,23 +52,9 @@ class Menu extends Phaser.Scene {
         jumps: 2
       }
       this.sound.play('sfx_select');
-      this.scene.start("playScene");
+      this.scene.start("menuScene");
     }
 
-    if (Phaser.Input.Keyboard.JustDown(keyDOWN)) {
-      game.settings = {
-        platformStartSpeed: 350,
-        spawnRange: [100, 350],
-        platformSizeRange: [50, 250],
-        playerGravity: 900,
-        jumpForce: 400,
-        playerStartPosition: 200,
-        maxHunger: 2000,
-        jumps: 2
-      }
-      this.sound.play('sfx_select');
-      this.scene.start("tutorialScene");
-    }
 
 
   }

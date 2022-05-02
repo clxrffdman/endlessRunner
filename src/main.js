@@ -17,7 +17,8 @@ let config = {
         arcade: {
             debug: false,
             gravity: { y: 0 },
-            tileBias: 32
+            tileBias: 32,
+            //debug: true
         }
     },
     fps: {
@@ -26,7 +27,7 @@ let config = {
     },
     resolution: 3,
     
-    scene: [ Menu, Play ]
+    scene: [ Menu, Play, Tutorial ]
     
 }
 
