@@ -16,6 +16,9 @@ class Play extends Phaser.Scene {
         this.load.image('hungerBar', './assets/hungerbarempty.png');
         this.load.image('hungerFill', './assets/hungerPixel.png');
         this.load.image('platform', './assets/testPlatformTile.png');
+        this.load.image('sand', './assets/floor_1.png');
+        this.load.image('ground', './assets/floor_2.png');
+        this.load.image('backdrop', './assets/backdrop.png');
         // load spritesheet
         this.load.spritesheet('explosion', './assets/explosion.png', { frameWidth: 64, frameHeight: 32, startFrame: 0, endFrame: 9 });
     }
@@ -26,8 +29,10 @@ class Play extends Phaser.Scene {
 
         this.staticGroup = this.physics.add.staticGroup();
         this.playerGroup = this.physics.add.group();
-        this.starfield = this.add.tileSprite(0, 0, 640, 480, 'starfield').setOrigin(0, 0);
-        this.floor = this.add.tileSprite(0, 600, 1280, 100, 'platform').setOrigin(0, 0);
+        this.backdrop = this.add.sprite(0,0,'backdrop').setOrigin(0,0).setDepth(0);
+        //this.starfield = this.add.tileSprite(0, 0, 640, 480, 'starfield').setOrigin(0, 0);
+        this.floor = this.add.tileSprite(0, 600, 1280, 100, 'sand').setOrigin(0, 0);
+        this.groundVisual = this.add.tileSprite(0, 560, 1280, 140, 'ground').setOrigin(0, 0);
         this.physics.add.existing(this.floor);
         this.staticGroup.add(this.floor);
         this.floor.body.allowGravity = false;
@@ -49,6 +54,7 @@ class Play extends Phaser.Scene {
 
 
         this.physics.add.collider(this.player, this.floor);
+
 
 
 
@@ -234,11 +240,12 @@ class Play extends Phaser.Scene {
 
         }
         platform.displayWidth = platformWidth;
+        platform.setOrigin(0,0.5);
         
         var d = Phaser.Math.Between(1, 8);
         if(d == 1){
             for(let i = 0; i < platformWidth - 25; i += 50){
-                this.spike = this.physics.add.sprite((posX + i + 25), platform.y - 50, "spike").setOrigin(0.5,0.5);
+                this.spike = this.physics.add.sprite((posX + i + 25), platform.y - 35, "spike").setOrigin(0.5,0.5);
     
                 this.physics.add.overlap(this.player, this.spike);
                 // platform.setImmovable(true);
@@ -264,15 +271,6 @@ class Play extends Phaser.Scene {
     }
 
     updatePlatformSpeeds() {
-        this.platformPool.getChildren().forEach(function (platform) {
-            platform.setVelocityX(this.speed * -1);
-        }, this);
-
-        this.platformGroup.getChildren().forEach(function (platform) {
-            platform.setVelocityX(this.speed * -1);
-
-        }, this);
-
         this.coins.getChildren().forEach(function (coin) {
             coin.setVelocityX(this.speed * -1);
             if(coin.x <= 0 - coin.width){
@@ -287,6 +285,17 @@ class Play extends Phaser.Scene {
                 spike.destroy();
             }
         }, this);
+        
+        this.platformPool.getChildren().forEach(function (platform) {
+            platform.setVelocityX(this.speed * -1);
+        }, this);
+
+        this.platformGroup.getChildren().forEach(function (platform) {
+            platform.setVelocityX(this.speed * -1);
+
+        }, this);
+
+        
 
 
     }
@@ -302,6 +311,7 @@ class Play extends Phaser.Scene {
         }, this);
 
         this.floor.tilePositionX -= 1;
+        this.groundVisual.tilePositionX -= 1;
         this.player.x -= 1;
     }
 
@@ -382,6 +392,7 @@ class Play extends Phaser.Scene {
             // this.updatePlatformSpeeds();
             // this.isTouchingObstacle = true;
             // //this.preventPlatformInches();
+            this.updatePlatformSpeeds();
         }
         else {
 
@@ -395,6 +406,7 @@ class Play extends Phaser.Scene {
             this.updatePlatformSpeeds();
             
             this.floor.tilePositionX += this.speed / 70;
+            this.groundVisual.tilePositionX += this.speed /70;
         }
 
         if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)) {
@@ -402,7 +414,7 @@ class Play extends Phaser.Scene {
         }
 
         //scroll backdrop
-        this.starfield.tilePositionX -= 4;
+        //this.starfield.tilePositionX -= 4;
 
 
         if (!this.gameOver) {
@@ -441,60 +453,6 @@ class Play extends Phaser.Scene {
 
     }
 
-    checkExplosionCollision(rocket, ship, explosionRadius) {
-        if (rocket.x - explosionRadius < ship.x + ship.width &&
-            rocket.x + rocket.width + explosionRadius > ship.x &&
-            rocket.y - explosionRadius < ship.y + ship.height &&
-            rocket.height + rocket.y + explosionRadius > ship.y) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    checkCollision(rocket, ship) {
-
-        if (rocket.x < ship.x + ship.width &&
-            rocket.x + rocket.width > ship.x &&
-            rocket.y < ship.y + ship.height &&
-            rocket.height + rocket.y > ship.y) {
-            if (rocket.isPowered()) {
-                if (this.checkExplosionCollision(rocket, this.ship01, 500)) {
-                    this.shipExplode(this.ship01);
-                    game.settings.spaceshipSpeed++;
-                }
-                if (this.checkExplosionCollision(rocket, this.ship02, 500)) {
-                    this.shipExplode(this.ship02);
-                    game.settings.spaceshipSpeed++;
-                }
-                if (this.checkExplosionCollision(rocket, this.ship03, 500)) {
-                    this.shipExplode(this.ship03);
-                    game.settings.spaceshipSpeed++;
-                }
-
-
-
-
-            }
-            return true;
-        } else {
-            return false;
-        }
-
-
-
-
-    }
-
-    collectcoin(player, coin) {
-        //check if we have already hit coin 
-
-    }
-
-    //called after coin has animated
-    killcoin(coin) {
-        //Removes the coin from the screen
-        coin.kill();
-    }
+ 
 
 }

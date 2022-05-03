@@ -19,7 +19,6 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.isSlide = false;
         this.jumpAmount = 0;
         this.jumpVelocity = 425;
-
         
     }
 
