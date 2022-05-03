@@ -23,7 +23,9 @@ let config = {
     },
     fps: {
         forceSetTimeout: true,
-        target: 60
+        target: 60,
+        max: 60,
+        forceSetTimeOut: true
     },
     resolution: 3,
     

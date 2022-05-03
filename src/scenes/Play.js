@@ -27,7 +27,7 @@ class Play extends Phaser.Scene {
 
     create() {
         //backdrop
-
+        this.physics.world.setFPS(60);
         this.staticGroup = this.physics.add.staticGroup();
         this.playerGroup = this.physics.add.group();
         this.backdrop = this.add.sprite(0,0,'backdrop').setOrigin(0,0).setDepth(0);
@@ -130,8 +130,8 @@ class Play extends Phaser.Scene {
         // number of consecutive jumps made by the player
         this.playerJumps = 0;
         this.speed = 350;
-        this.accel = 1.2;
-        this.hungerDrain = 0.5;
+        this.accel = 2.4;
+        this.hungerDrain = 1;
         this.isTouchingObstacle = false;
         this.distanceTravelled = 0;
         this.hunger = 1000;
@@ -244,12 +244,13 @@ class Play extends Phaser.Scene {
 
         }
         platform.displayWidth = platformWidth;
+        
         platform.setOrigin(0,0.5);
         
         var d = Phaser.Math.Between(1, 8);
         if(d == 1){
             for(let i = 0; i < platformWidth - 25; i += 50){
-                this.spike = this.physics.add.sprite((posX + i + 25), platform.y - 35, "spike").setOrigin(0.5,0.5);
+                this.spike = this.physics.add.sprite((posX + i + 25), platform.y - 30, "spike").setOrigin(0.5,0.5);
     
                 this.physics.add.overlap(this.player, this.spike);
                 // platform.setImmovable(true);
@@ -259,7 +260,7 @@ class Play extends Phaser.Scene {
         }
         else if(d < 8){
             for(let i = 0; i < platformWidth - 25; i += 50){
-                this.coin = this.physics.add.sprite((posX + i + 25), platform.y - 50, "rocket").setOrigin(0.5,0.5);
+                this.coin = this.physics.add.sprite((posX + i + 25), platform.y - 35, "rocket").setOrigin(0.5,0.5);
     
                 this.physics.add.overlap(this.player, this.coin);
                 // platform.setImmovable(true);
@@ -269,7 +270,7 @@ class Play extends Phaser.Scene {
         }
 
         
-        platform.displayHeight = 40;
+        platform.displayHeight = 30;
 
         this.nextPlatformDistance = Phaser.Math.Between(game.settings.spawnRange[0], game.settings.spawnRange[1]);
     }
@@ -339,8 +340,8 @@ class Play extends Phaser.Scene {
 
         if(this.growth == 0 && this.distanceTravelled/1000 > 2000){
             this.growth = 1;
-            this.accel = 2;
-            this.hungerDrain = 0.65;
+            this.accel = 4;
+            this.hungerDrain = 1.3;
             this.player.setScale(0.09);
             this.player.x += 5;
             this.player.modifyJumpHeight(550)
@@ -348,8 +349,8 @@ class Play extends Phaser.Scene {
 
         if(this.growth == 1 && this.distanceTravelled/1000 > 4000){
             this.growth = 2;
-            this.accel = 2.5;
-            this.hungerDrain = 0.75;
+            this.accel = 5;
+            this.hungerDrain = 1.5;
             this.player.setScale(0.12);
             this.player.x += 5;
             this.player.modifyJumpHeight(575);
