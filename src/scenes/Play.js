@@ -21,6 +21,7 @@ class Play extends Phaser.Scene {
         this.load.image('backdrop', './assets/backdrop.png');
         // load spritesheet
         this.load.spritesheet('explosion', './assets/explosion.png', { frameWidth: 64, frameHeight: 32, startFrame: 0, endFrame: 9 });
+        this.load.audio('backgroundtrack', './assets/testsong.wav');
     }
 
 
@@ -37,6 +38,9 @@ class Play extends Phaser.Scene {
         this.staticGroup.add(this.floor);
         this.floor.body.allowGravity = false;
         this.floor.body.immovable = true;
+        this.backgroundMusic = this.sound.add('backgroundtrack');
+        this.backgroundMusic.loop = true; // This is what you are looking for
+        this.backgroundMusic.play();
 
         //UI
         this.add.rectangle(0, borderUISize + borderPadding, game.config.width, borderUISize * 2, 0xB8E1FF).setOrigin(0, 0.5).setDepth(1);
@@ -333,7 +337,7 @@ class Play extends Phaser.Scene {
             this.distanceText.text = "Distance Travelled - " + Math.round(this.distanceTravelled/1000,0);
         }
 
-        if(this.growth == 0 && this.distanceTravelled/1000 > 4000){
+        if(this.growth == 0 && this.distanceTravelled/1000 > 2000){
             this.growth = 1;
             this.accel = 2;
             this.hungerDrain = 0.65;
@@ -342,7 +346,7 @@ class Play extends Phaser.Scene {
             this.player.modifyJumpHeight(550)
         }
 
-        if(this.growth == 1 && this.distanceTravelled/1000 > 7000){
+        if(this.growth == 1 && this.distanceTravelled/1000 > 4000){
             this.growth = 2;
             this.accel = 2.5;
             this.hungerDrain = 0.75;
@@ -380,6 +384,7 @@ class Play extends Phaser.Scene {
             this.add.text(game.config.width/2, game.config.height/2 + 64, 'Press (R) to Restart or ← to Menu', scoreConfig).setOrigin(0.5);
             
             if(Phaser.Input.Keyboard.JustDown(keyR)){
+                this.backgroundMusic.stop();
                 this.scene.restart();
             }
         }
@@ -410,6 +415,7 @@ class Play extends Phaser.Scene {
         }
 
         if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)) {
+            this.backgroundMusic.stop();
             this.scene.start("menuScene");
         }
 
