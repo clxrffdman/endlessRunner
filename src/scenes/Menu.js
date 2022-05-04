@@ -8,6 +8,7 @@ class Menu extends Phaser.Scene {
     this.load.audio('sfx_down', './assets/menudown.wav');
     this.load.audio('sfx_explosion', './assets/explosion38.wav');
     this.load.audio('sfx_rocket', './assets/rocket_shot.wav');
+    this.load.image('menu', './assets/menu.png');
   }
 
   create() {
@@ -28,6 +29,8 @@ class Menu extends Phaser.Scene {
     menuConfig.backgroundColor = '#00FF00';
     menuConfig.color = '#000';
     this.add.text(game.config.width / 2, game.config.height / 2, 'Press ↑ to start and ↓ for controls!', menuConfig).setOrigin(0.5);
+
+    this.menubackdrop = this.add.sprite(150, 0, 'menu').setOrigin(0, 0).setScale(0.35);
 
     keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
     keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
