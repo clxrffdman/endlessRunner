@@ -28,7 +28,7 @@ class Play extends Phaser.Scene {
         this.load.audio('grow', './assets/grow.wav');
         this.load.audio('up', './assets/menuup.wav');
         this.load.audio('lettuce', './assets/lettuce.wav');
-        this.load.atlas('haroldanims', './assets/haroldsheet.png', './assets/haroldsheet.json');
+        this.load.atlas('haroldanims', './assets/haroldanims.png', './assets/haroldanims.json');
     }
 
 
@@ -61,12 +61,42 @@ class Play extends Phaser.Scene {
         //spaceships
         this.player = new Player(this, game.config.width / 4, game.config.height - borderPadding - borderUISize - 150, 'turtle', Phaser.AUTO, 5).setOrigin(0.5, 0.5);
         this.player.setScale(0.075);
-        // this.player.animations.add(
-        //     'walk',
-        //     Phaser.Animation.generateFrameNames('turtle_walk_', 1, 2),
-        //     5,
-        //     true
-        // );
+        this.anims.create({ 
+            key: 'walk', 
+            frames: this.anims.generateFrameNames('haroldanims', {      
+                prefix: 'turtle_walk_',
+                start: 1,
+                end: 2,
+                suffix: '',
+                zeroPad: 0 
+            }), 
+            frameRate: 30,
+            repeat: -1 
+        });
+        this.anims.create({
+            key: 'death',
+            defaultTextureKey: 'haroldanims',
+            frames: [
+                { frame: 'turtle_dead' }
+            ],
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'slide',
+            defaultTextureKey: 'haroldanims',
+            frames: [
+                { frame: 'turtle_slide' }
+            ],
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'hurt',
+            defaultTextureKey: 'haroldanims',
+            frames: [
+                { frame: 'turtle_hit' }
+            ],
+            repeat: -1
+        });
         
 
 
@@ -210,6 +240,10 @@ class Play extends Phaser.Scene {
                 this.speedUpgrade = 0;
                 this.eatUpgrade = 0;
                 this.sound.play('hurt');
+                this.player.anims.play('hurt', true);
+                this.clock = this.time.delayedCall(1500, () => {
+                    this.player.anims.play('walk', true);
+                }, null, this);
             }
 
             
@@ -223,8 +257,9 @@ class Play extends Phaser.Scene {
         this.updatePlatformSpeeds();
 
 
-
-
+        // this.player.anims.play('death', true);
+        // console.log('anims', this.anims.anims.entries);
+        this.player.anims.play('walk', true);
 
     }
 
@@ -349,9 +384,18 @@ class Play extends Phaser.Scene {
             if(this.invincibleframes > 0){
                 this.invincibleframes--;
             }
+            else{
+                if(keyDOWN.isDown){
+                    this.player.anims.play('slide', true);
+                }
+                else{
+                    this.player.anims.play('walk', true);
+                }
+            }
             this.hungerFill.scaleX = 128 * ((this.hunger/game.settings.maxHunger));
             this.distanceTravelled += this.speed;
             this.distanceText.text = "Distance Travelled - " + Math.round(this.distanceTravelled/1000,0);
+            
         }
 
         if(this.growth == 0 && this.distanceTravelled/1000 > 2000){
@@ -394,7 +438,7 @@ class Play extends Phaser.Scene {
             this.speed = 0;
             this.player.setGravityY(0);
             this.player.setVelocityY(0);
-
+            this.player.anims.play('death', true);
             let scoreConfig = {
                 fontFamily: 'Noto Sans',
             fontSize: '28px',
