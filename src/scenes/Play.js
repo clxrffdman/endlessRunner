@@ -60,7 +60,7 @@ class Play extends Phaser.Scene {
 
         //spaceships
         this.player = new Player(this, game.config.width / 4, game.config.height - borderPadding - borderUISize - 150, 'turtle', Phaser.AUTO, 5).setOrigin(0.5, 0.5);
-        this.player.setScale(0.075);
+        this.player.setScale(0.1);
         this.anims.create({ 
             key: 'walk', 
             frames: this.anims.generateFrameNames('haroldanims', {      
@@ -70,7 +70,7 @@ class Play extends Phaser.Scene {
                 suffix: '',
                 zeroPad: 0 
             }), 
-            frameRate: 30,
+            frameRate: 15,
             repeat: -1 
         });
         this.anims.create({
@@ -403,7 +403,7 @@ class Play extends Phaser.Scene {
             this.growth = 1;
             this.accel = 4;
             this.hungerDrain = 1.3;
-            this.player.setScale(0.09);
+            this.player.setScale(0.12);
             this.player.x += 5;
             this.player.modifyJumpHeight(550)
         }
@@ -413,7 +413,7 @@ class Play extends Phaser.Scene {
             this.growth = 2;
             this.accel = 5;
             this.hungerDrain = 1.5;
-            this.player.setScale(0.12);
+            this.player.setScale(0.14);
             this.player.x += 5;
             this.player.modifyJumpHeight(575);
         }
@@ -423,9 +423,29 @@ class Play extends Phaser.Scene {
             this.growth = 3;
             this.accel = 5.5;
             this.hungerDrain = 1.8;
-            this.player.setScale(0.15);
+            this.player.setScale(0.16);
             this.player.x += 6;
             this.player.modifyJumpHeight(585);
+        }
+
+        if(this.growth == 3 && this.distanceTravelled/1000 > 8000){
+            this.sound.play('grow');
+            this.growth = 4;
+            this.accel = 5.75;
+            this.hungerDrain = 1.85;
+            this.player.setScale(0.18);
+            this.player.x += 6;
+            this.player.modifyJumpHeight(590);
+        }
+
+        if(this.growth == 4 && this.distanceTravelled/1000 > 10000){
+            this.sound.play('grow');
+            this.growth = 5;
+            this.accel = 6;
+            this.hungerDrain = 1.9;
+            this.player.setScale(0.2);
+            this.player.x += 6;
+            this.player.modifyJumpHeight(595);
         }
 
         if(!this.gameOver && this.hunger <= 0){

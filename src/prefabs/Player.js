@@ -19,6 +19,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.isSlide = false;
         this.jumpAmount = 0;
         this.jumpVelocity = 425;
+        this.setBodySize(600,300,false);
         
     }
 
@@ -91,7 +92,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         if(this.isSlide && !keyDOWN.isDown){
             this.isSlide = false;
             this.body.setGravityY(1200);
-            this.setBodySize(600,400,false);
+            this.setBodySize(600,300,false);
             this.y -= 15;
         }
 
