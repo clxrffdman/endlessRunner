@@ -9,7 +9,7 @@ class Play extends Phaser.Scene {
     preload() {
         // load images/tile sprites
         this.load.image('rocket', './assets/rocket_p1.png');
-        this.load.image('spike', './assets/spike.png'); 
+        this.load.image('spike', './assets/coral.png'); 
         this.load.image('turtle', './assets/turtle.png');
         this.load.image('starfield', './assets/starfield.png');
         // this.load.image('platform', './assets/floor.png');
@@ -28,6 +28,7 @@ class Play extends Phaser.Scene {
         this.load.audio('grow', './assets/grow.wav');
         this.load.audio('up', './assets/menuup.wav');
         this.load.audio('lettuce', './assets/lettuce.wav');
+        this.load.atlas('haroldanims', './assets/haroldsheet.png', './assets/haroldsheet.json');
     }
 
 
@@ -36,10 +37,10 @@ class Play extends Phaser.Scene {
         this.physics.world.setFPS(60);
         this.staticGroup = this.physics.add.staticGroup();
         this.playerGroup = this.physics.add.group();
-        this.backdrop = this.add.sprite(0,0,'backdrop').setOrigin(0,0).setDepth(0);
+        this.backdrop = this.add.tileSprite(0,137, 5120, 2880,'backdrop').setOrigin(0,0).setDepth(0).setScale(0.25);
         //this.starfield = this.add.tileSprite(0, 0, 640, 480, 'starfield').setOrigin(0, 0);
-        this.floor = this.add.tileSprite(0, 600, 1280, 100, 'sand').setOrigin(0, 0);
-        this.groundVisual = this.add.tileSprite(0, 560, 1280, 140, 'ground').setOrigin(0, 0);
+        this.floor = this.add.tileSprite(0, 640, 1280, 100, 'sand').setOrigin(0, 0);
+        this.groundVisual = this.add.tileSprite(0, 560, 2480, 500, 'ground').setOrigin(0, 0).setScale(0.5);
         this.physics.add.existing(this.floor);
         this.staticGroup.add(this.floor);
         this.floor.body.allowGravity = false;
@@ -60,6 +61,12 @@ class Play extends Phaser.Scene {
         //spaceships
         this.player = new Player(this, game.config.width / 4, game.config.height - borderPadding - borderUISize - 150, 'turtle', Phaser.AUTO, 5).setOrigin(0.5, 0.5);
         this.player.setScale(0.075);
+        // this.player.animations.add(
+        //     'walk',
+        //     Phaser.Animation.generateFrameNames('turtle_walk_', 1, 2),
+        //     5,
+        //     true
+        // );
         
 
 
@@ -258,7 +265,7 @@ class Play extends Phaser.Scene {
         var d = Phaser.Math.Between(1, 8);
         if(d == 1){
             for(let i = 0; i < platformWidth - 25; i += 50){
-                this.spike = this.physics.add.sprite((posX + i + 25), platform.y - 30, "spike").setOrigin(0.5,0.5);
+                this.spike = this.physics.add.sprite((posX + i + 25), platform.y - 35, "spike").setOrigin(0.5,0.5).setScale(0.5);
     
                 this.physics.add.overlap(this.player, this.spike);
                 // platform.setImmovable(true);
@@ -325,6 +332,7 @@ class Play extends Phaser.Scene {
 
         this.floor.tilePositionX -= 1;
         this.groundVisual.tilePositionX -= 1;
+        this.backdrop.tilePositionX -= 1;
         this.player.x -= 1;
     }
 
@@ -402,7 +410,7 @@ class Play extends Phaser.Scene {
 
             scoreConfig.fixedWidth = 0;
 
-            this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
+            this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER - You let Harold starve! You MONSTER!', scoreConfig).setOrigin(0.5);
             this.add.text(game.config.width/2, game.config.height/2 + 64, 'Press (R) to Restart or ← to Menu', scoreConfig).setOrigin(0.5);
             
             if(Phaser.Input.Keyboard.JustDown(keyR)){
@@ -434,6 +442,7 @@ class Play extends Phaser.Scene {
             
             this.floor.tilePositionX += this.speed / 70;
             this.groundVisual.tilePositionX += this.speed /70;
+            this.backdrop.tilePositionX += this.speed /240;
         }
 
         if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)) {
