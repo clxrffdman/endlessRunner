@@ -139,7 +139,7 @@ class Play extends Phaser.Scene {
         this.spikes.enableBody = true;
 
 
-        let scoreConfig = {
+        this.scoreConfig = {
             fontFamily: 'Noto Sans',
             fontSize: '28px',
             // backgroundColor: '#F3B141',
@@ -151,11 +151,11 @@ class Play extends Phaser.Scene {
             },
             fixedWidth: 100
         }
-        scoreConfig.fixedWidth = 0;
+        this.scoreConfig.fixedWidth = 0;
 
         this.hungerFill = this.add.image(game.config.width - borderPadding * 15, borderUISize + borderPadding * 2, "hungerFill").setOrigin(0,0.5).setDepth(2);
         this.hungerBar = this.add.image(game.config.width - borderPadding * 15, borderUISize + borderPadding * 2, "hungerBar").setOrigin(0,0.5).setDepth(2);
-        this.hungerText = this.add.text((game.config.width - borderPadding * 15) - 60, borderUISize + borderPadding * 2, "Hunger:", scoreConfig).setOrigin(0.5,0.5).setDepth(2);
+        this.hungerText = this.add.text((game.config.width - borderPadding * 15) - 60, borderUISize + borderPadding * 2, "Hunger:", this.scoreConfig).setOrigin(0.5,0.5).setDepth(2);
         
         // pool
         this.platformPool = this.add.group({
@@ -179,7 +179,7 @@ class Play extends Phaser.Scene {
         this.hunger = 1000;
 
 
-        this.distanceText = this.add.text((borderPadding * 15)-80, borderUISize + borderPadding * 2, this.currentTime / 1000, scoreConfig).setOrigin(0,0.5).setDepth(2);
+        this.distanceText = this.add.text((borderPadding * 15)-80, borderUISize + borderPadding * 2, this.currentTime / 1000, this.scoreConfig).setOrigin(0,0.5).setDepth(2);
         this.distanceText.text = 0;
 
         // adding a platform to the game, the arguments are platform width and x position
@@ -370,33 +370,7 @@ class Play extends Phaser.Scene {
         this.player.x -= 1;
     }
 
-
-
-    update(time, delta) {
-
-
-        //console.log(this.hunger);
-
-
-        if(!this.gameOver){
-            this.hunger -= this.hungerDrain;
-            if(this.invincibleframes > 0){
-                this.invincibleframes--;
-            }
-            else{
-                if(keyDOWN.isDown){
-                    this.player.anims.play('slide', true);
-                }
-                else{
-                    this.player.anims.play('walk', true);
-                }
-            }
-            this.hungerFill.scaleX = 128 * ((this.hunger/game.settings.maxHunger));
-            this.distanceTravelled += this.speed;
-            this.distanceText.text = "Distance Travelled - " + Math.round(this.distanceTravelled/1000,0);
-            
-        }
-
+    grow(){
         if(this.growth == 0 && this.distanceTravelled/1000 > 2000){
             this.sound.play('grow');
             this.growth = 1;
@@ -451,80 +425,92 @@ class Play extends Phaser.Scene {
             this.player.modifyJumpHeight(595);
             this.speedlimit = 1250;
         }
+    }
 
-        if(!this.gameOver && this.hunger <= 0){
-            this.gameOver = true;
-            this.sound.play('death');
+
+
+    update(time, delta) {
+
+
+        //console.log(this.hunger);
+
+        if((this.distanceTravelled/1000)%2000){
+            this.grow();
         }
 
-        if(this.gameOver){
-
-            this.speed = 0;
-            this.player.setGravityY(0);
-            this.player.setVelocityY(0);
-            this.player.anims.play('death', true);
-            let scoreConfig = {
-                fontFamily: 'Noto Sans',
-            fontSize: '28px',
-            // backgroundColor: '#F3B141',
-            color: '#376E60',
-            align: 'right',
-            padding: {
-                top: 5,
-                bottom: 5,
-            },
-            fixedWidth: 100
+        if(!this.gameOver){
+            this.player.update();
+            this.hunger -= this.hungerDrain;
+            if(this.invincibleframes > 0){
+                this.invincibleframes--;
             }
-
-            scoreConfig.fixedWidth = 0;
-
-            this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER - You let Harold starve! You MONSTER!', scoreConfig).setOrigin(0.5);
-            this.add.text(game.config.width/2, game.config.height/2 + 64, 'Press (R) to Restart or ← to Menu', scoreConfig).setOrigin(0.5);
+            else{
+                if(keyDOWN.isDown){
+                    this.player.anims.play('slide', true);
+                }
+                else{
+                    this.player.anims.play('walk', true);
+                }
+            }
+            this.hungerFill.scaleX = 128 * ((this.hunger/game.settings.maxHunger));
+            this.distanceTravelled += this.speed;
+            this.distanceText.text = "Distance Travelled - " + Math.round(this.distanceTravelled/1000,0);
             
-            if(Phaser.Input.Keyboard.JustDown(keyR)){
-                this.backgroundMusic.stop();
-                this.scene.restart();
-            }
-        }
-
-        
-
-
-        if (this.player.body.touching.right == true || this.player.body.embedded == true) {
-            // this.speed = 0;
-            // this.updatePlatformSpeeds();
-            // this.isTouchingObstacle = true;
-            // //this.preventPlatformInches();
-            this.updatePlatformSpeeds();
-        }
-        else {
-
             if (this.speed < this.speedlimit && !this.isTouchingObstacle) {
                 this.speed += this.accel;
-
+    
             }
 
-            this.isTouchingObstacle = false;
+            if(this.hunger <= 0){
+                this.gameOver = true;
+                this.sound.play('death');
+                this.player.anims.play('death', true);
+                this.scoreConfig.fixedWidth = 0;
+                this.speed = 0;
+                this.player.setGravityY(0);
+                this.player.setVelocityY(0);
+                this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER - You let Harold starve! You MONSTER!', this.scoreConfig).setOrigin(0.5);
+                this.add.text(game.config.width/2, game.config.height/2 + 64, 'Press (R) to Restart or ← to Menu', this.scoreConfig).setOrigin(0.5);
+            }
 
-            this.updatePlatformSpeeds();
             
+        
             this.floor.tilePositionX += this.speed / 70;
             this.groundVisual.tilePositionX += this.speed /70;
             this.backdrop.tilePositionX += this.speed /240;
         }
 
-        if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)) {
-            this.backgroundMusic.stop();
-            this.scene.start("menuScene");
+
+        if(this.gameOver){
+
+            
+            
+            if(Phaser.Input.Keyboard.JustDown(keyR)){
+                this.backgroundMusic.stop();
+                this.scene.restart();
+            }
+
+            if (Phaser.Input.Keyboard.JustDown(keyLEFT)) {
+                this.backgroundMusic.stop();
+                this.scene.start("menuScene");
+            }
         }
 
-        //scroll backdrop
-        //this.starfield.tilePositionX -= 4;
+        this.isTouchingObstacle = false;
+        this.updatePlatformSpeeds();
 
+        
+            
+        
 
-        if (!this.gameOver) {
-            this.player.update();
-        }
+        
+
+        
+
+        
+
+        
+
 
         // recycling platforms
         let minDistance = game.config.width;
@@ -547,7 +533,7 @@ class Play extends Phaser.Scene {
             //console.log(nextPlatformWidth);
             this.addPlatform(nextPlatformWidth, game.config.width + nextPlatformWidth / 2);
         }
-        // check collisions
+        
 
 
     }
