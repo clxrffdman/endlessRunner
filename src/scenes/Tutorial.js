@@ -4,7 +4,8 @@ class Tutorial extends Phaser.Scene {
   }
 
   preload() {
-    this.load.audio('sfx_select', './assets/blip_select12.wav');
+    this.load.audio('sfx_up', './assets/menuup.wav');
+    this.load.audio('sfx_down', './assets/menudown.wav');
     this.load.audio('sfx_explosion', './assets/explosion38.wav');
     this.load.audio('sfx_rocket', './assets/rocket_shot.wav');
   }
@@ -51,7 +52,7 @@ class Tutorial extends Phaser.Scene {
         maxHunger: 2000,
         jumps: 2
       }
-      this.sound.play('sfx_select');
+      this.sound.play('sfx_up');
       this.scene.start("menuScene");
     }
 

@@ -25,7 +25,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     doJump(){
 
         if(this.isGrounded){
-            this.setVelocity(0, -425);
+            this.setVelocity(0, -this.jumpVelocity);
+            this.scene.sound.play('jump');
+            
         }
         else{
             this.currentJumpTime++;
@@ -33,6 +35,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 
         if(this.jumpHeld && (this.body.velocity.y < 0 || this.jumpAmount < 2) && this.currentJumpTime < this.maxJumpTime){
             this.setVelocity(0, -this.jumpVelocity);
+            this.scene.sound.play('jump');
             //this.setVelocity(0, -300 + (50*((this.maxJumpTime - this.currentJumpTime)/this.maxJumpTime)));
         }
 

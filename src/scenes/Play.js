@@ -22,6 +22,11 @@ class Play extends Phaser.Scene {
         // load spritesheet
         this.load.spritesheet('explosion', './assets/explosion.png', { frameWidth: 64, frameHeight: 32, startFrame: 0, endFrame: 9 });
         this.load.audio('backgroundtrack', './assets/testsong.wav');
+        this.load.audio('death', './assets/death.wav');
+        this.load.audio('jump', './assets/jump.wav');
+        this.load.audio('hurt', './assets/hurt.mp3');
+        this.load.audio('grow', './assets/grow.wav');
+        this.load.audio('up', './assets/menuup.wav');
     }
 
 
@@ -173,6 +178,7 @@ class Play extends Phaser.Scene {
 
 
             this.hunger += 50;
+            this.sound.play('up');
             if(this.hunger > game.settings.maxHunger){
                 this.hunger = game.settings.maxHunger;
             }
@@ -195,6 +201,7 @@ class Play extends Phaser.Scene {
                 this.setSpeedZero();
                 this.speedUpgrade = 0;
                 this.eatUpgrade = 0;
+                this.sound.play('hurt');
             }
 
             
@@ -339,6 +346,7 @@ class Play extends Phaser.Scene {
         }
 
         if(this.growth == 0 && this.distanceTravelled/1000 > 2000){
+            this.sound.play('grow');
             this.growth = 1;
             this.accel = 4;
             this.hungerDrain = 1.3;
@@ -348,6 +356,7 @@ class Play extends Phaser.Scene {
         }
 
         if(this.growth == 1 && this.distanceTravelled/1000 > 4000){
+            this.sound.play('grow');
             this.growth = 2;
             this.accel = 5;
             this.hungerDrain = 1.5;
@@ -358,6 +367,7 @@ class Play extends Phaser.Scene {
 
         if(!this.gameOver && this.hunger <= 0){
             this.gameOver = true;
+            this.sound.play('death');
         }
 
         if(this.gameOver){
@@ -367,16 +377,16 @@ class Play extends Phaser.Scene {
             this.player.setVelocityY(0);
 
             let scoreConfig = {
-                fontFamily: 'Courier',
-                fontSize: '28px',
-                backgroundColor: '#F3B141',
-                color: '#843605',
-                align: 'right',
-                padding: {
-                    top: 5,
-                    bottom: 5,
-                },
-                fixedWidth: 100
+                fontFamily: 'Noto Sans',
+            fontSize: '28px',
+            // backgroundColor: '#F3B141',
+            color: '#376E60',
+            align: 'right',
+            padding: {
+                top: 5,
+                bottom: 5,
+            },
+            fixedWidth: 100
             }
 
             scoreConfig.fixedWidth = 0;
