@@ -27,6 +27,7 @@ class Play extends Phaser.Scene {
         this.load.audio('hurt', './assets/hurt.mp3');
         this.load.audio('grow', './assets/grow.wav');
         this.load.audio('up', './assets/menuup.wav');
+        this.load.audio('lettuce', './assets/lettuce.wav');
     }
 
 
@@ -178,7 +179,7 @@ class Play extends Phaser.Scene {
 
 
             this.hunger += 50;
-            this.sound.play('up');
+            this.sound.play('lettuce');
             if(this.hunger > game.settings.maxHunger){
                 this.hunger = game.settings.maxHunger;
             }
@@ -365,6 +366,16 @@ class Play extends Phaser.Scene {
             this.player.modifyJumpHeight(575);
         }
 
+        if(this.growth == 2 && this.distanceTravelled/1000 > 6000){
+            this.sound.play('grow');
+            this.growth = 3;
+            this.accel = 5.5;
+            this.hungerDrain = 1.8;
+            this.player.setScale(0.15);
+            this.player.x += 6;
+            this.player.modifyJumpHeight(585);
+        }
+
         if(!this.gameOver && this.hunger <= 0){
             this.gameOver = true;
             this.sound.play('death');
@@ -435,14 +446,8 @@ class Play extends Phaser.Scene {
 
 
         if (!this.gameOver) {
-
-
-
             this.player.update();
-
         }
-
-
 
         // recycling platforms
         let minDistance = game.config.width;
