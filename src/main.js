@@ -1,12 +1,13 @@
-// Calex Raffield, craffiel, Rocket Patrol Mods, 04/15/22, 2 hrs
-// POINT BREAKDOWN:
-// Simultanious Two-Player mode (30)
-// Display the time remaining (in seconds) on the screen (10)
-// Implement a new timing/scoring mechanism that adds time to the clock for successful hits (20)
-// Create a new spaceship type (w/ new artwork) that's smaller, moves faster, and is worth more points (20)
-// Create and implement a new weapon (w/ new behavior and graphics) (Missile with unique flight speed, acceleration and AOE Damage) (20)
-// Rocket acclerates throughout flight rather then staying at static speed (?)
-// Ships speed up with each kill (?) 
+// Calex Raffield, Michelle Huang, Isaiah Roberts
+// Game Title: Hungry Harold
+// Completed: 05/04/2022
+// Creative Tilt: We took the traditional endless runner and kind of flipped it, with the player not being able to 
+// move in the X-axis and only being allowed to control jumping. Part of the programming behind it was managing 
+// the speed of the platforms, pickups, and modifying them based on the state of the player (is colliding, is in air, etc)
+//
+// In terms of trying something new, something we noticed with a lot of endless runner games that we had played in the past 
+// were that they weren't very forgiving, often forcing a restart on the first mistake. We tried to alliviate that by making 
+// the game very forgiving, using a hunger system instead of a traditional lives system. 
 
 let config = {
     type: Phaser.CANVAS,

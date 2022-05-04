@@ -8,7 +8,7 @@ class Play extends Phaser.Scene {
 
     preload() {
         // load images/tile sprites
-        this.load.image('rocket', './assets/rocket_p1.png');
+        this.load.image('rocket', './assets/lettuce.png');
         this.load.image('spike', './assets/coral.png'); 
         this.load.image('turtle', './assets/turtle.png');
         this.load.image('starfield', './assets/starfield.png');
@@ -37,7 +37,7 @@ class Play extends Phaser.Scene {
         this.physics.world.setFPS(60);
         this.staticGroup = this.physics.add.staticGroup();
         this.playerGroup = this.physics.add.group();
-        this.backdrop = this.add.tileSprite(0,137, 5120, 2880,'backdrop').setOrigin(0,0).setDepth(0).setScale(0.25);
+        this.backdrop = this.add.tileSprite(0,110, 5120, 2880,'backdrop').setOrigin(0,0).setDepth(0).setScale(0.27);
         //this.starfield = this.add.tileSprite(0, 0, 640, 480, 'starfield').setOrigin(0, 0);
         this.floor = this.add.tileSprite(0, 640, 1280, 100, 'sand').setOrigin(0, 0);
         this.groundVisual = this.add.tileSprite(0, 560, 2480, 500, 'ground').setOrigin(0, 0).setScale(0.5);
@@ -120,8 +120,7 @@ class Play extends Phaser.Scene {
 
         this.gameOver = false;
         this.growth = 0;
-        this.speedUpgrade = 0;
-        this.eatUpgrade = 0;
+        this.speedlimit = 1000;
         this.invincibleframes = 0;
 
         // group with all active platforms.
@@ -310,7 +309,7 @@ class Play extends Phaser.Scene {
         }
         else if(d < 8){
             for(let i = 0; i < platformWidth - 25; i += 50){
-                this.coin = this.physics.add.sprite((posX + i + 25), platform.y - 35, "rocket").setOrigin(0.5,0.5);
+                this.coin = this.physics.add.sprite((posX + i + 25), platform.y - 40, "rocket").setOrigin(0.5,0.5).setScale(0.6);
     
                 this.physics.add.overlap(this.player, this.coin);
                 // platform.setImmovable(true);
@@ -405,7 +404,8 @@ class Play extends Phaser.Scene {
             this.hungerDrain = 1.3;
             this.player.setScale(0.12);
             this.player.x += 5;
-            this.player.modifyJumpHeight(550)
+            this.player.modifyJumpHeight(550);
+            this.speedlimit = 1050;
         }
 
         if(this.growth == 1 && this.distanceTravelled/1000 > 4000){
@@ -416,6 +416,7 @@ class Play extends Phaser.Scene {
             this.player.setScale(0.14);
             this.player.x += 5;
             this.player.modifyJumpHeight(575);
+            this.speedlimit = 1100;
         }
 
         if(this.growth == 2 && this.distanceTravelled/1000 > 6000){
@@ -426,6 +427,7 @@ class Play extends Phaser.Scene {
             this.player.setScale(0.16);
             this.player.x += 6;
             this.player.modifyJumpHeight(585);
+            this.speedlimit = 1150;
         }
 
         if(this.growth == 3 && this.distanceTravelled/1000 > 8000){
@@ -436,6 +438,7 @@ class Play extends Phaser.Scene {
             this.player.setScale(0.18);
             this.player.x += 6;
             this.player.modifyJumpHeight(590);
+            this.speedlimit = 1200;
         }
 
         if(this.growth == 4 && this.distanceTravelled/1000 > 10000){
@@ -446,6 +449,7 @@ class Play extends Phaser.Scene {
             this.player.setScale(0.2);
             this.player.x += 6;
             this.player.modifyJumpHeight(595);
+            this.speedlimit = 1250;
         }
 
         if(!this.gameOver && this.hunger <= 0){
@@ -495,7 +499,7 @@ class Play extends Phaser.Scene {
         }
         else {
 
-            if (this.speed < 1000 && !this.isTouchingObstacle) {
+            if (this.speed < this.speedlimit && !this.isTouchingObstacle) {
                 this.speed += this.accel;
 
             }
@@ -540,7 +544,7 @@ class Play extends Phaser.Scene {
         if (minDistance > this.nextPlatformDistance) {
             // var nextPlatformWidth = Phaser.Math.Between(game.settings.platformSizeRange[0], game.settings.platformSizeRange[1]);
             var nextPlatformWidth = Math.round((Phaser.Math.Between(game.settings.platformSizeRange[0], game.settings.platformSizeRange[1]))/50)*50;
-            console.log(nextPlatformWidth);
+            //console.log(nextPlatformWidth);
             this.addPlatform(nextPlatformWidth, game.config.width + nextPlatformWidth / 2);
         }
         // check collisions

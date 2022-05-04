@@ -25,7 +25,7 @@ class Tutorial extends Phaser.Scene {
     }
 
     this.add.text(game.config.width / 2, game.config.height / 5 - borderUISize - borderPadding, 'Controls', menuConfig).setOrigin(0.5);
-    this.add.text(game.config.width / 2, game.config.height / 4, 'Use ↑↓ arrows to move!', menuConfig).setOrigin(0.5);
+    this.add.text(game.config.width / 2, game.config.height / 4, 'Use ↑↓ arrows to move (JUMP, DOUBLE JUMP, and SLIDE)!', menuConfig).setOrigin(0.5);
     this.add.text(game.config.width / 2, 1.3*(game.config.height / 4), 'Collect lettuce to grow!', menuConfig).setOrigin(0.5);
     this.add.text(game.config.width / 2, 1.6*(game.config.height / 4), 'Coral will slow you down!', menuConfig).setOrigin(0.5);
     this.add.text(game.config.width / 2, 1.9*(game.config.height / 4), 'Avoid starvation at all costs!', menuConfig).setOrigin(0.5);
